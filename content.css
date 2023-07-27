@@ -1,0 +1,17 @@
+#timer {
+  height: 75px;
+  width: 275px;
+  border: 1px solid black;
+  border-radius: 2px;
+  margin-bottom: 2px;
+  text-align: center;
+  display: grid;
+  grid-template-rows: 2fr 1fr;
+}
+
+#start {
+  margin-right: 20px;
+}
+#reset {
+  margin-left: 20px;
+}
