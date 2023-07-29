@@ -7,9 +7,20 @@
 
   <body>
     <div class="timer">
-      <div class="time" id="timerDisplay">00:00</div>
-      <button class="startButton" id="startButton">Start</button>
-      <button class="resetButton" id="resetButton" disabled>Reset</button>
+      <h1 class="title">Default Timer</h1>
+      <div class="defaultTimerButton">
+        <button class="button" id="5minButton">5 min</button>
+        <button class="button" id="10minButton">10 min</button>
+        <button class="button" id="20minButton">20 min</button>
+        <button class="button" id="30minButton">30 min</button>
+      </div>
+      <input type="time" class="timer" id="customTime">
+      <div class="customTimerButton">
+        <button class="button" id="customButton">custom</button>
+      </div>
     </div>
   </body>
+
+  <script src="popup.js"></script>
+
 </html>

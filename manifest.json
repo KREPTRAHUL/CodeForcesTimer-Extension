@@ -6,7 +6,7 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["tabs", "activeTab", "webNavigation", "storage"],
+  "permissions": ["tabs", "activeTab", "webNavigation", "storage", "content_scripts"],
   "content_scripts": [
     {
       "matches": ["https://codeforces.com/problemset/problem/*"],
