@@ -1,6 +1,13 @@
 const maxTime = 300;
 let intervalId;
 
+const getFormattedTime = (time) => {
+  let min = Math.floor(time / 60);
+  let sec = Math.floor(time % 60);
+  if (min < 10) min = `0${min}`;
+  if (sec < 10) sec = `0${sec}`;
+  return `${min}:${sec}`;
+};
 const getId = () => {
   const currentURL = window.location.toString();
   const len = currentURL.length;
@@ -13,29 +20,64 @@ const getId = () => {
     }
     id += currentURL.charAt(i);
   }
-  console.log(id);
   id = id.split("").reverse().join("");
   return id;
 };
 
-const startTimer = () => {
+const updateTimerDisplay = (timeLeft) => {
+  const timeElem = document.getElementById("timeElem");
+  timeElem.textContent = getFormattedTime(timeLeft);
+};
+
+const startTimer = (time) => {
   const currentTime = new Date();
   const startTime = currentTime.getTime();
-
   const id = getId();
-  localStorage.setItem(id, startTime);
 
-  timeLeft = maxTime;
-  let intervalId = setInterval(function () {
-    timeLeft--;
-  });
-  const val = localStorage.getItem(id);
-  console.log(val);
+  if (intervalId) return;
+
+  const idInLocalStorage = localStorage.getItem(id);
+  if (!idInLocalStorage) {
+    localStorage.setItem(id, startTime);
+  }
+
+  timeLeft = time;
+
+  let countPreviousAccepted =
+    document.querySelectorAll(".verdict-accepted").length;
+  console.log(countPreviousAccepted);
+
+  intervalId = setInterval(function () {
+    const currentAccepted =
+      document.querySelectorAll(".verdict-accepted").length;
+    if (currentAccepted == countPreviousAccepted + 1) {
+      const timeElem = document.getElementById("timeElem");
+      timeElem.textContent = "Time Taken:";
+      timeElem.textContent += getFormattedTime(time - timeLeft);
+      localStorage.setItem(`TimeTaken_${id}`, time - timeLeft);
+      clearInterval(intervalId);
+      intervalId = undefined;
+    } else {
+      timeLeft--;
+      if (timeLeft < 0) {
+        const timeElem = document.getElementById("timeElem");
+        timeElem.textContent = "Time Out";
+        clearInterval(intervalId);
+      } else {
+        updateTimerDisplay(timeLeft);
+      }
+    }
+  }, 1000);
 };
 
 const resetTimer = () => {
+  clearInterval(intervalId);
+  intervalId = undefined;
+
   const id = getId();
   localStorage.removeItem(id);
+  const timeElem = document.getElementById("timeElem");
+  timeElem.textContent = getFormattedTime(maxTime);
   //add the timer
 };
 
@@ -44,7 +86,11 @@ const addContent = () => {
   timer.id = "timer";
 
   const timeElem = document.createElement("div");
-  timeElem.textContent = "5:00";
+  timeElem.id = "timeElem";
+  id = getId();
+  const search = localStorage.getItem(id);
+  if (search) timeElem.textContent = "";
+  else timeElem.textContent = getFormattedTime(maxTime);
 
   const mybuttons = document.createElement("div");
   mybuttons.id = "mybuttons";
@@ -52,7 +98,9 @@ const addContent = () => {
   const start = document.createElement("button");
   start.textContent = "Start";
   start.id = "start";
-  start.addEventListener("click", startTimer);
+  start.addEventListener("click", () => {
+    startTimer(maxTime);
+  });
 
   const reset = document.createElement("button");
   reset.textContent = "Reset";
@@ -70,8 +118,27 @@ const addContent = () => {
   }
 };
 
+const recoverFromLocalStorage = () => {
+  let id = getId();
+  let timeTaken = localStorage.getItem(`TimeTaken_${id}`);
+  if (timeTaken) {
+    const timeElem = document.getElementById("timeElem");
+    timeElem.textContent = `Time Taken: ${timeTaken}`;
+  }
+  let startTime = localStorage.getItem(id);
+  if (!startTime) return;
+  const Time = new Date();
+  const currTime = Time.getTime();
+  if (currTime - startTime < maxTime * 1000) {
+    startTimer(maxTime - (currTime - startTime) / 1000);
+  }
+};
+
 const insertTimer = () => {
-  window.addEventListener("load", addContent);
+  window.addEventListener("load", () => {
+    addContent();
+    recoverFromLocalStorage();
+  });
 };
 
 insertTimer();
