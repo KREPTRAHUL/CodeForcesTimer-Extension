@@ -65,7 +65,9 @@ const startTimer = (time) => {
 
   timeLeft = time;
 
-  let countPreviousAccepted = localStorage.getItem(id).count_PreviousAccepted;
+  let countPreviousAccepted = JSON.parse(
+    localStorage.getItem(id)
+  ).count_PreviousAccepted;
   //console.log(countPreviousAccepted);
 
   intervalId = setInterval(function () {
@@ -73,11 +75,12 @@ const startTimer = (time) => {
       document.querySelectorAll(".verdict-accepted").length;
     if (currentAccepted == countPreviousAccepted + 1) {
       const timeElem = document.getElementById("timeElem");
-      const attributes = localStorage.getItem(id);
+      const attributes = JSON.parse(localStorage.getItem(id));
 
       timeElem.textContent = "Time Taken:";
       timeElem.textContent += getFormattedTime(attributes.max_Time - timeLeft);
-      localStorage.setItem(`TimeTaken_${id}`, time - timeLeft);
+      localStorage.setItem(`TimeTaken_${id}`, attributes.max_Time - timeLeft);
+      localStorage.removeItem(id);
       clearInterval(intervalId);
       intervalId = undefined;
     } else {
@@ -149,14 +152,14 @@ const recoverFromLocalStorage = () => {
   let defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime");
   if (defaultMaxTimeInStorage) defaultMaxTime = defaultMaxTimeInStorage;
   let id = getId();
+  const checkIfTimerRunning = localStorage.getItem(id);
   let timeTaken = localStorage.getItem(`TimeTaken_${id}`);
-  if (timeTaken) {
+  if (timeTaken && !checkIfTimerRunning) {
     const timeElem = document.getElementById("timeElem");
-    timeElem.textContent = `Time Taken: ${timeTaken}`;
+    timeElem.textContent = `Time Taken: ${getFormattedTime(timeTaken)}`;
     return;
   }
   const attributes = JSON.parse(localStorage.getItem(id));
-  console.log(attributes);
   //let startTime = localStorage.getItem(id).start_Time;
   if (!attributes) return;
   const Time = new Date();
