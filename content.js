@@ -1,5 +1,17 @@
-const maxTime = 300;
+let maxTime = 300;
 let intervalId;
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  // Check if the message is from the popup and contains the value
+  if (message.time) {
+    // Retrieve the value sent from the popup
+    maxTime = message.time;
+    // const valueReceived = message.message;
+    // console.log("Received value from popup.js: ", valueReceived);
+    console.log(maxTime);
+    // Use the value as needed in your content script
+  }
+});
 
 const getFormattedTime = (time) => {
   let min = Math.floor(time / 60);
