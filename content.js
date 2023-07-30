@@ -1,15 +1,15 @@
-let maxTime = 300;
+let defaultMaxTime = 300;
 let intervalId;
 
+//handle message from popup.js and set the time to defaultMaxTime
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  // Check if the message is from the popup and contains the value
   if (message.time) {
-    // Retrieve the value sent from the popup
-    maxTime = message.time;
-    // const valueReceived = message.message;
-    // console.log("Received value from popup.js: ", valueReceived);
-    console.log(maxTime);
-    // Use the value as needed in your content script
+    defaultMaxTime = message.time;
+    localStorage.setItem("defaultMaxTime", defaultMaxTime);
+    if (!intervalId) {
+      const timeElem = document.getElementById("timeElem");
+      timeElem.textContent = getFormattedTime(defaultMaxTime);
+    }
   }
 });
 
@@ -21,6 +21,7 @@ const getFormattedTime = (time) => {
   return `${min}:${sec}`;
 };
 const getId = () => {
+  //Id of the question
   const currentURL = window.location.toString();
   const len = currentURL.length;
   let ct = 0,
@@ -48,24 +49,34 @@ const startTimer = (time) => {
 
   if (intervalId) return;
 
-  const idInLocalStorage = localStorage.getItem(id);
-  if (!idInLocalStorage) {
-    localStorage.setItem(id, startTime);
+  const attributesInStorage = localStorage.getItem(id);
+  if (!attributesInStorage) {
+    let countPreviousAccepted =
+      document.querySelectorAll(".verdict-accepted").length;
+    const attributes = {
+      max_Time: time,
+      start_Time: startTime,
+      count_PreviousAccepted: countPreviousAccepted,
+    };
+    localStorage.setItem(id, JSON.stringify(attributes));
+    console.log(attributes);
+    console.log(JSON.parse(localStorage.getItem(id)));
   }
 
   timeLeft = time;
 
-  let countPreviousAccepted =
-    document.querySelectorAll(".verdict-accepted").length;
-  console.log(countPreviousAccepted);
+  let countPreviousAccepted = localStorage.getItem(id).count_PreviousAccepted;
+  //console.log(countPreviousAccepted);
 
   intervalId = setInterval(function () {
     const currentAccepted =
       document.querySelectorAll(".verdict-accepted").length;
     if (currentAccepted == countPreviousAccepted + 1) {
       const timeElem = document.getElementById("timeElem");
+      const attributes = localStorage.getItem(id);
+
       timeElem.textContent = "Time Taken:";
-      timeElem.textContent += getFormattedTime(time - timeLeft);
+      timeElem.textContent += getFormattedTime(attributes.max_Time - timeLeft);
       localStorage.setItem(`TimeTaken_${id}`, time - timeLeft);
       clearInterval(intervalId);
       intervalId = undefined;
@@ -89,8 +100,7 @@ const resetTimer = () => {
   const id = getId();
   localStorage.removeItem(id);
   const timeElem = document.getElementById("timeElem");
-  timeElem.textContent = getFormattedTime(maxTime);
-  //add the timer
+  timeElem.textContent = getFormattedTime(defaultMaxTime);
 };
 
 const addContent = () => {
@@ -100,9 +110,14 @@ const addContent = () => {
   const timeElem = document.createElement("div");
   timeElem.id = "timeElem";
   id = getId();
-  const search = localStorage.getItem(id);
-  if (search) timeElem.textContent = "";
-  else timeElem.textContent = getFormattedTime(maxTime);
+  const attributes = JSON.parse(localStorage.getItem(id));
+  if (attributes) timeElem.textContent = "";
+  else {
+    const defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime");
+    if (defaultMaxTimeInStorage)
+      timeElem.textContent = getFormattedTime(defaultMaxTimeInStorage);
+    else timeElem.textContent = getFormattedTime(defaultMaxTime);
+  }
 
   const mybuttons = document.createElement("div");
   mybuttons.id = "mybuttons";
@@ -111,7 +126,7 @@ const addContent = () => {
   start.textContent = "Start";
   start.id = "start";
   start.addEventListener("click", () => {
-    startTimer(maxTime);
+    startTimer(defaultMaxTime);
   });
 
   const reset = document.createElement("button");
@@ -131,18 +146,24 @@ const addContent = () => {
 };
 
 const recoverFromLocalStorage = () => {
+  let defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime");
+  if (defaultMaxTimeInStorage) defaultMaxTime = defaultMaxTimeInStorage;
   let id = getId();
   let timeTaken = localStorage.getItem(`TimeTaken_${id}`);
   if (timeTaken) {
     const timeElem = document.getElementById("timeElem");
     timeElem.textContent = `Time Taken: ${timeTaken}`;
+    return;
   }
-  let startTime = localStorage.getItem(id);
-  if (!startTime) return;
+  const attributes = JSON.parse(localStorage.getItem(id));
+  console.log(attributes);
+  //let startTime = localStorage.getItem(id).start_Time;
+  if (!attributes) return;
   const Time = new Date();
   const currTime = Time.getTime();
-  if (currTime - startTime < maxTime * 1000) {
-    startTimer(maxTime - (currTime - startTime) / 1000);
+
+  if (currTime - attributes.start_Time < attributes.max_Time * 1000) {
+    startTimer(attributes.max_Time - (currTime - attributes.start_Time) / 1000);
   }
 };
 
