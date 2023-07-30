@@ -6,7 +6,13 @@ const min10Button = document.getElementById("10minButton")
 const min20Button = document.getElementById("20minButton")
 const min30Button = document.getElementById("30minButton")
 
-const customTime = document.getElementById("customTime")
+const customTimer = document.getElementById("customTimer")
+if(!customTimer.value){
+    customTimer.value = localStorage.getItem("customTime");
+}
+else{
+    customTimer.value = "00:00";
+}
 const customButton = document.getElementById("customButton")
 
 var active;
@@ -70,7 +76,9 @@ min5Button.onclick = function() {
     removeActiveClass(active);
     active = "min5button";
     addActiveClass(active);
+    localStorage.setItem("defaultTime", defaultTime);
     localStorage.setItem("activeClass", "min5button");
+    customTimer.value = "00:00";
     console.log("custom time = ", active)
 }
 min10Button.onclick = function() {
@@ -78,7 +86,9 @@ min10Button.onclick = function() {
     removeActiveClass(active);
     active = "min10button";
     addActiveClass(active);
+    localStorage.setItem("defaultTime", defaultTime);
     localStorage.setItem("activeClass", "min10button");
+    customTimer.value = "00:00";
     console.log("custom time = ", active)
 }
 min20Button.onclick = function() {
@@ -86,7 +96,9 @@ min20Button.onclick = function() {
     removeActiveClass(active);
     active = "min20button";
     addActiveClass(active);
+    localStorage.setItem("defaultTime", defaultTime);
     localStorage.setItem("activeClass", "min20button");
+    customTimer.value = "00:00";
     console.log("custom time = ", active)
 }
 min30Button.onclick = function() {
@@ -94,20 +106,23 @@ min30Button.onclick = function() {
     removeActiveClass(active);
     active = "min30button";
     addActiveClass(active);
+    localStorage.setItem("defaultTime", defaultTime);
     localStorage.setItem("activeClass", "min30button");
+    customTimer.value = "00:00";
     console.log("custom time = ", active)
 }
 
 customButton.onclick = function() {
-    if(customTime.value){
+    if(customTimer.value){
         console.log("pressed = ", customButton.id)
-        console.log("custom time = ", customTime.value)
-        const [hours, minutes] = customTime.value.split(":").map(Number);
+        console.log("custom time = ", customTimer.value)
+        const [hours, minutes] = customTimer.value.split(":").map(Number);
         defaultTime = hours * 60 + minutes;
         removeActiveClass(active);
         active = "customButton";
         customButton.classList.add("active");
-        localStorage.setItem("customButton", defaultTime);
+        localStorage.setItem("defaultTime", defaultTime);
+        localStorage.setItem("customTime", customTimer.value)
         localStorage.setItem("activeClass", "customButton");
         console.log("custom time = ", active)
     }

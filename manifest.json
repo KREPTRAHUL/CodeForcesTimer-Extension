@@ -4,9 +4,13 @@
   "version": "1.0",
   "description": "Shows Count down timer while solving codeforces problems",
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": "logo.png"
   },
-  "permissions": ["tabs", "activeTab", "webNavigation", "storage", "content_scripts"],
+  "icons": {
+    "128": "logo.png"
+  },
+  "permissions": ["tabs", "activeTab", "webNavigation", "storage"],
   "content_scripts": [
     {
       "matches": ["https://codeforces.com/problemset/problem/*"],
