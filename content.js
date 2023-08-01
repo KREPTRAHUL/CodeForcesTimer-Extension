@@ -42,56 +42,53 @@ const updateTimerDisplay = (timeLeft) => {
   timeElem.textContent = getFormattedTime(timeLeft);
 };
 
-const startTimer = (time) => {
+const addSubmitTime = () => {
   const currentTime = new Date();
-  const startTime = currentTime.getTime();
+  const currTime = currentTime.getTime() / 1000;
   const id = getId();
+  const attributesInStorage = JSON.parse(localStorage.getItem(id));
+  attributesInStorage.submission_Time = currTime;
+  localStorage.setItem(id, JSON.stringify(attributesInStorage));
+};
+const activateSubmitButtonandStore = () => {
+  const submiBtn = document.getElementById("sidebarSubmitButton");
+  submiBtn.addEventListener("click", addSubmitTime);
+};
 
+const deactivateSubmitButton = () => {
+  const submiBtn = document.getElementById("sidebarSubmitButton");
+  submiBtn.removeEventListener("click", addSubmitTime);
+};
+
+const startTimer = (time) => {
   if (intervalId) return;
+
+  const currentTime = new Date();
+  const startTime = currentTime.getTime() / 1000;
+  const id = getId();
 
   const attributesInStorage = localStorage.getItem(id);
   if (!attributesInStorage) {
-    let countPreviousAccepted =
-      document.querySelectorAll(".verdict-accepted").length;
     const attributes = {
       max_Time: time,
       start_Time: startTime,
-      count_PreviousAccepted: countPreviousAccepted,
     };
     localStorage.setItem(id, JSON.stringify(attributes));
-    console.log(attributes);
-    console.log(JSON.parse(localStorage.getItem(id)));
   }
+  activateSubmitButtonandStore();
 
   timeLeft = time;
 
-  let countPreviousAccepted = JSON.parse(
-    localStorage.getItem(id)
-  ).count_PreviousAccepted;
-  //console.log(countPreviousAccepted);
-
   intervalId = setInterval(function () {
-    const currentAccepted =
-      document.querySelectorAll(".verdict-accepted").length;
-    if (currentAccepted == countPreviousAccepted + 1) {
+    timeLeft--;
+    if (timeLeft < 0) {
       const timeElem = document.getElementById("timeElem");
-      const attributes = JSON.parse(localStorage.getItem(id));
-
-      timeElem.textContent = "Time Taken:";
-      timeElem.textContent += getFormattedTime(attributes.max_Time - timeLeft);
-      localStorage.setItem(`TimeTaken_${id}`, attributes.max_Time - timeLeft);
-      localStorage.removeItem(id);
+      timeElem.textContent = "Time Out";
       clearInterval(intervalId);
-      intervalId = undefined;
+      deactivateSubmitButton();
+      localStorage.removeItem(id);
     } else {
-      timeLeft--;
-      if (timeLeft < 0) {
-        const timeElem = document.getElementById("timeElem");
-        timeElem.textContent = "Time Out";
-        clearInterval(intervalId);
-      } else {
-        updateTimerDisplay(timeLeft);
-      }
+      updateTimerDisplay(timeLeft);
     }
   }, 1000);
 };
@@ -104,6 +101,7 @@ const resetTimer = () => {
   localStorage.removeItem(id);
   const timeElem = document.getElementById("timeElem");
   timeElem.textContent = getFormattedTime(defaultMaxTime);
+  deactivateSubmitButton();
 };
 
 const addContent = () => {
@@ -148,26 +146,60 @@ const addContent = () => {
   }
 };
 
+const checkIfTimerRunning = (attributes) => {
+  const date = new Date();
+  const currTime = date.getTime() / 1000;
+  let remTime = attributes.max_Time - (currTime - attributes.start_Time);
+  if (remTime <= 0) {
+    const id = getId();
+    localStorage.removeItem(id);
+    const timeElem = document.getElementById("timeElem");
+    timeElem.textContent = "Time Out";
+    return false;
+  } else {
+    return true;
+  }
+};
+
+const getRecentVerdict = () => {
+  const tableRows = document.querySelector(".rtable.smaller tbody");
+  const recentSubmission = tableRows
+    .querySelector("tr:nth-child(2) td:nth-child(3)")
+    .textContent.trim();
+  if (recentSubmission == "Accepted") return true;
+  return false;
+};
 const recoverFromLocalStorage = () => {
   let defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime");
   if (defaultMaxTimeInStorage) defaultMaxTime = defaultMaxTimeInStorage;
-  let id = getId();
-  const checkIfTimerRunning = localStorage.getItem(id);
-  let timeTaken = localStorage.getItem(`TimeTaken_${id}`);
-  if (timeTaken && !checkIfTimerRunning) {
-    const timeElem = document.getElementById("timeElem");
-    timeElem.textContent = `Time Taken: ${getFormattedTime(timeTaken)}`;
-    return;
-  }
-  const attributes = JSON.parse(localStorage.getItem(id));
-  //let startTime = localStorage.getItem(id).start_Time;
-  if (!attributes) return;
-  const Time = new Date();
-  const currTime = Time.getTime();
 
-  if (currTime - attributes.start_Time < attributes.max_Time * 1000) {
-    startTimer(attributes.max_Time - (currTime - attributes.start_Time) / 1000);
+  let id = getId();
+  let attributes = localStorage.getItem(id);
+
+  if (!attributes) return;
+  attributes = JSON.parse(attributes);
+  if (attributes.submission_Time) {
+    const verdict = getRecentVerdict();
+    if (verdict) {
+      const timeElem = document.getElementById("timeElem");
+      timeElem.textContent = "Time Taken:";
+      timeElem.textContent += getFormattedTime(
+        attributes.submission_Time - attributes.start_Time
+      );
+      localStorage.setItem(
+        `TimeTaken_${id}`,
+        attributes.submission_Time - attributes.start_Time
+      );
+      localStorage.removeItem(id);
+      return;
+    }
   }
+  const isTimerRunning = checkIfTimerRunning(attributes); //take cares of Time Out also
+  if (!isTimerRunning) return;
+
+  const date = new Date();
+  const currTime = date.getTime() / 1000;
+  startTimer(attributes.max_Time - (currTime - attributes.start_Time));
 };
 
 const insertTimer = () => {
