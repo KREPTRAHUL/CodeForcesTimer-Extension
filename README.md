@@ -1,7 +1,7 @@
 # CodeForcesTimer-Extension
 ## How to Install?
 1. Download the repository as .zip file and extract it.
-2. Open Google Chrome -> Settings -> Extensions -> Toggle on Developer Mode -> Load Unpacked Extensions -> select the extracted folder.
+2. Open Google Chrome -> Click on Extension icon -> Manage Extensions -> Toggle on Developer Mode -> Load Unpacked Extensions -> select the extracted folder.
 ## How to use?
 - When you click on the extension, a small window opens, allowing you to select the desired time for the Countdown timer.
 - If a solution is submitted and it is accepted, the timer will display the "Time Taken" to solve the question.
