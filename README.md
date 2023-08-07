@@ -11,3 +11,4 @@
 - The application provides an available "Start" button to initiate the timer, and a "Reset" button to enable users to reset the timer to its initial state.
 - Once the timer is started, it cannot be paused. This feature has been implemented to create a contest-like environment, where participants must manage their time effectively without the option to pause the timer.
 - The application can also display the time taken by the user to solve the same question in the previous attempt if the user used the extension during their last attempt.
+- The timer won't appear when a contest is running.
