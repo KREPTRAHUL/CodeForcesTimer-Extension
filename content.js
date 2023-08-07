@@ -21,6 +21,7 @@ const getFormattedTime = (time) => {
   return `${min}:${sec}`;
 };
 const getId = () => {
+  //problem may be opened from contest/Problemset, so two diff handlers
   //Id of the question
   const currentURL = window.location.toString();
   const len = currentURL.length;
@@ -64,6 +65,7 @@ const getSubmissionsCount = () => {
 };
 
 const addSubmitTimeAndSubmissionsCount = () => {
+  //when start button is clicked and timer is running, if submit button is clicked add id-{submissontime,submissioncount} to local storage
   const currentTime = new Date();
   const currTime = currentTime.getTime() / 1000;
   const id = getId();
@@ -196,17 +198,18 @@ const getRecentVerdict = () => {
   return false;
 };
 const recoverFromLocalStorage = () => {
-  let defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime");
+  let defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime"); //If there is default time stored, then retrive it.
   if (defaultMaxTimeInStorage) defaultMaxTime = defaultMaxTimeInStorage;
 
   let id = getId();
   let attributes = localStorage.getItem(id);
-  console.log(attributes);
 
   if (!attributes) {
-    const alreadySolved = localStorage.getItem(`TimeTaken_${id}`);
+    //If no attributes
+    const alreadySolved = localStorage.getItem(`TimeTaken_${id}`); //Check if already solved
     console.log(alreadySolved);
     if (alreadySolved) {
+      //If solved show the time taken
       const timeElem = document.getElementById("timeElem");
       timeElem.textContent = "Time Taken:";
       timeElem.textContent += getFormattedTime(alreadySolved);
@@ -217,11 +220,12 @@ const recoverFromLocalStorage = () => {
   attributes = JSON.parse(attributes);
   if (
     attributes.submission_Time &&
-    attributes.submissoins_Count + 1 == getSubmissionsCount()
+    attributes.submissoins_Count + 1 == getSubmissionsCount() //Check if submissons increased (There may be a case where a slon is submitted but may be same file, then it won't run)
   ) {
     const verdict = getRecentVerdict();
     console.log("verdit", verdict);
     if (verdict) {
+      //If solved show time taken and store it in local storage
       const timeElem = document.getElementById("timeElem");
       timeElem.textContent = "Time Taken:";
       timeElem.textContent += getFormattedTime(
@@ -234,17 +238,25 @@ const recoverFromLocalStorage = () => {
       localStorage.removeItem(id);
       return;
     } else {
-      delete attributes["submission_Time"];
+      delete attributes["submission_Time"]; //since it is not AC remove submission_time and submission_count
       delete attributes["submissoins_Count"];
       localStorage.setItem(id, JSON.stringify(attributes));
     }
+  }
+  if (
+    attributes.submission_Time &&
+    attributes.submissoins_Count == getSubmissionsCount()
+  ) {
+    delete attributes["submission_Time"]; //since submission count not increased delete
+    delete attributes["submissoins_Count"];
+    localStorage.setItem(id, JSON.stringify(attributes));
   }
   const isTimerRunning = checkIfTimerRunning(attributes); //take cares of Time Out also
   if (!isTimerRunning) {
     return;
   }
 
-  const date = new Date();
+  const date = new Date(); //If timer is running continue with
   const currTime = date.getTime() / 1000;
   startTimer(attributes.max_Time - (currTime - attributes.start_Time));
 };
