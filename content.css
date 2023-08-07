@@ -1,5 +1,5 @@
 #timer {
-  height: 75px;
+  height: 80px;
   border: 1px solid rgb(134, 131, 131);
   border-radius: 2px;
   margin-bottom: 15px;
@@ -16,6 +16,6 @@
 }
 #timeElem {
   font-size: 30px;
-  font-weight: 250;
+  font-weight: 200;
   color: #383434;
 }
