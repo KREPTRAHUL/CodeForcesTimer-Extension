@@ -22,7 +22,7 @@ const getFormattedTime = (time) => {
 };
 const getId = () => {
   //problem may be opened from contest/Problemset, so two diff handlers
-  //Id of the question
+  //Id of the question, returns like (1852/A)
   const currentURL = window.location.toString();
   const len = currentURL.length;
   if (currentURL.includes("contest")) {
@@ -86,8 +86,8 @@ const deactivateSubmitButton = () => {
 
 const startTimer = (time) => {
   const timeElem = document.getElementById("timeElem");
-  if (timeElem.textContent.includes("Time")) return;
-  if (intervalId) return;
+  if (timeElem.textContent.includes("Time")) return; //If timer is displaying Time OUt/Time Taken then start should not be active
+  if (intervalId) return; //Start button inactive if interval is running
 
   const currentTime = new Date();
   const startTime = currentTime.getTime() / 1000;
@@ -111,7 +111,7 @@ const startTimer = (time) => {
       const timeElem = document.getElementById("timeElem");
       timeElem.textContent = "Time Out";
       clearInterval(intervalId);
-      deactivateSubmitButton();
+      deactivateSubmitButton(); //deactivate the submit button
       localStorage.removeItem(id);
     } else {
       updateTimerDisplay(timeLeft);
@@ -121,13 +121,13 @@ const startTimer = (time) => {
 
 const resetTimer = () => {
   clearInterval(intervalId);
-  intervalId = undefined;
+  intervalId = undefined; //don't know why clearInterval is not working
 
   const id = getId();
   localStorage.removeItem(id);
   const timeElem = document.getElementById("timeElem");
   timeElem.textContent = getFormattedTime(defaultMaxTime);
-  timeElem.style.fontSize = "25px";
+  timeElem.style.fontSize = "25px"; //take care of font size
   deactivateSubmitButton();
 };
 
@@ -139,7 +139,7 @@ const addContent = () => {
   timeElem.id = "timeElem";
   id = getId();
   const attributes = JSON.parse(localStorage.getItem(id));
-  if (attributes) timeElem.textContent = "";
+  if (attributes) timeElem.textContent = ""; //added based on attributes
   else {
     const defaultMaxTimeInStorage = localStorage.getItem("defaultMaxTime");
     if (defaultMaxTimeInStorage)
