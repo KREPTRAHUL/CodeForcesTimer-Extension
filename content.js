@@ -127,7 +127,7 @@ const resetTimer = () => {
   localStorage.removeItem(id);
   const timeElem = document.getElementById("timeElem");
   timeElem.textContent = getFormattedTime(defaultMaxTime);
-  timeElem.style.fontSize = "25px"; //take care of font size
+  timeElem.style.fontSize = "30px"; //take care of font size
   deactivateSubmitButton();
 };
 
